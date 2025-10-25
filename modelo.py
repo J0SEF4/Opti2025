@@ -52,7 +52,7 @@ P_cubierta = 3
 #cantidad agua inicial en fuente f
 W_base = {f: 1000 for f in F}
 #costo transportar 1 ton de agua por arco (i.j)
-C_flujo = {(i,j): 0.5 for (i,j) in A}
+C_flujo = {(i,j): 5 for (i,j) in A}  # todos los arcos tienen costo 5
 #capacidad maxima de flujo de agua en argo (i,j) mensualmente
 K_flujo ={(i,j): 500 for (i,j) in A}
 #cantidad agua maxima que se puede aplicar al relave r en cualquier periodo sin considerar cubierta vegetal
@@ -152,14 +152,14 @@ for r in R:
 #R12 Presupuesto total
 model.addConstr(
     quicksum(C_agua[r,t]*x_agua[r,t] + C_vegmant[r,t]*z_veg[r,t] + C_mant[r,t]*y_mant[r,t] + C_veginst[r,t]*y_veg[r,t] for r in R for t in T) 
-    + quicksum(C_flujo[(i,j)]*x_flujo[(i,j),t] for (i,j) in A for t in T)
+    + quicksum(C_flujo[i,j]*x_flujo[i,j,t] for (i,j) in A for t in T)
     <= B_max
 )
 #R13 Balance de flujo en nodos intermedios
 for n in N:
     if n not in F and n not in R:  # solo para nodos intermedios
         for t in T:
-            model.addConstr(quicksum(x_flujo[(i,n),t] for (i,j) in A if j == n) - quicksum(x_flujo[(n,k),t] for (i,j) in A if i == n) == 0)
+            model.addConstr(quicksum(x_flujo[i,j,t] for (i,j) in A if j == n) - quicksum(x_flujo[i,j,t] for (i,j) in A if i == n) == 0)
 
 #R14 Condición inicial de la fuente
 for f in F:
@@ -169,22 +169,25 @@ for f in F:
 for f in F:
     for t in T:
         if t > 0:
-            model.addConstr(W[f,t] == W[f,t-1] + W_entrante[f,t] - quicksum(x_flujo[(f,k),t] for (i,j) in A if i == f))
+            model.addConstr(W[f,t] == W[f,t-1] + W_entrante[f,t] - quicksum(x_flujo[i,j,t] for (i,j) in A if i == f))
 
 #R16 No extraer más de lo disponible
 for f in F:
     for t in T:
-        model.addConstr(quicksum(x_flujo[(f,k),t] for (i,j) in A if i == f) <= W[f,t-1] + W_entrante[f,t])
+        if t==0: #agregue esto pq no existia W[f,-1], pq cuando t=0 se intenta acceder a W[f,-1] q no existe en el diccionario
+            model.addConstr(quicksum(x_flujo[i,j,t] for (i,j) in A if i == f) <= W_entrante[f,t])
+        else:
+            model.addConstr(quicksum(x_flujo[i,j,t] for (i,j) in A if i == f) <= W[f,t-1] + W_entrante[f,t])
 
 #R17 Nodos de relave
 for r in R:
     for t in T:
-        model.addConstr(quicksum(x_flujo[(j,r),t] for (j,r2) in A if r2 == r) == x_agua[r,t])
+        model.addConstr(quicksum(x_flujo[i,j,t] for (i,j) in A if j == r) == x_agua[r,t])
 
 #R18 Capacidad de las tuberías
 for (i, j) in A:
     for t in T:
-        model.addConstr(x_flujo[(i,j), t] <= K_flujo[(i, j)])
+        model.addConstr(x_flujo[i,j,t] <= K_flujo[i, j])
 
 
 #función objetivo
