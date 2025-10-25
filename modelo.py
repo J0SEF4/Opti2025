@@ -5,35 +5,62 @@ import pandas as pd
 # datos/parámetros del modelo
 
 #   conjuntos
-T= #meses de planificación, t
-R= #relaves, r
-F= #fuentes de agua, f
-N= #nodos de la red, fuentes, nodos intermedios y relaves, n
-A= #arcos de la red, (i,j)
+#meses de planificación, t
+T = list(range(12))  # 12 meses
+#relaves, r
+R = ['R1', 'R2', 'R3']  # 3 relaves
+#fuentes de agua, f
+F = ['F1', 'F2']  # 2 fuentes de agua
+#nodos de la red, fuentes, nodos intermedios y relaves, n
+N = F + ['N1', 'N2'] + R  # nodos intermedios N1, N2
+#arcos de la red, (i,j)
+A = [('F1', 'N1'), ('F2', 'N1'), ('N1', 'N2'), ('N2', 'R1'), ('N2', 'R2'), ('N1', 'R3')]  # ejemplo de arcos
 
 #   parámetros
-C_agua = #costo por ton de agua aplicado en relave r, mes t
-C_veginst =  #costo instalar cubierta vegetal en relave r, mes t
-C_vegmant = #costo mantención cubierta vegetal en relave r, mes t
-C_mant = #costo oportunidad realizar mantención en relave r, mes t
-PM_base = #concentracion inicial de PM en relave r
-PM_agregado = #concentracion de PM que se agrega al relave r, mes t
-PM_max = #umbral maximo de PM permitido en relave r por mes de planificación t
-PM = #umbral promedio maximo de PM permitido para todos los relaves r en mes t
-alpha = #reducción PM por cada ton de agua aplicada en relave r
-beta = #maxima reducción PM por cubierta vegetal en relave r por mes de planificación
-H_mant = #agua minima necesaria para humedecer relave r cuando se realiza mantención por mes de planificación
-H_cubierta = #agua minima necesaria para humedecer una cubierta vegetal a su nivel optimo en relave r por mes de planificación
-B_max = #presupuesto maximo a lo largo del periodo de planificación
-P = #periodos de duración de permanencia de cubierta vegetal en relave r 
-P_max = #cantidad maxima de periodos consecutivos que pueden pasar sin hacer mantención a un relave
-P_cubierta = #cantidad  maxima de periodos consecutivos que pueden pasar sin satisfacer completamente el requerimiento de agua de la cubierta
-W_base = #cantidad agua inicial en fuente f
-C_flujo = #costo transportar 1 ton de agua por arco (i.j)
-K_flujo = #capacidad maxima de flujo de agua en argo (i,j) mensualmente
-U_agua = #cantidad agua maxima que se puede aplicar al relave r en cualquier periodo sin considerar cubierta vegetal
-a = #ton de agua minima que se aplica a un relave r si se decide humedecerlo
-W_entrante = #flujo neto entrante a fuente f durante mes t.
+#costo por ton de agua aplicado en relave r, mes t
+C_agua = {(r,t): 1 for r in R for t in T}
+#costo instalar cubierta vegetal en relave r, mes t
+C_veginst = {(r,t): 5 for r in R for t in T}
+#costo mantención cubierta vegetal en relave r, mes t
+C_vegmant = {(r,t): 2 for r in R for t in T}
+#costo oportunidad realizar mantención en relave r, mes t
+C_mant = {(r,t): 3 for r in R for t in T}
+#concentracion inicial de PM en relave r
+PM_base = {r: 10 for r in R}
+#concentracion de PM que se agrega al relave r, mes t
+PM_agregado = {(r,t): 2 for r in R for t in T}
+#umbral maximo de PM permitido en relave r por mes de planificación t
+PM_max = {(r,t): 25 for r in R for t in T}
+#umbral promedio maximo de PM permitido para todos los relaves r en mes t
+PM_prom = {t: 20 for t in T}
+#reducción PM por cada ton de agua aplicada en relave r
+alpha = {r: 0.1 for r in R}
+#maxima reducción PM por cubierta vegetal en relave r por mes de planificación
+beta = {r: 5 for r in R}
+#agua minima necesaria para humedecer relave r cuando se realiza mantención por mes de planificación
+H_mant = {r: 50 for r in R}
+#agua minima necesaria para humedecer una cubierta vegetal a su nivel optimo en relave r por mes de planificación
+H_cubierta = {r: 40 for r in R}
+#presupuesto maximo a lo largo del periodo de planificación
+B_max = 10000
+#periodos de duración de permanencia de cubierta vegetal en relave r 
+P = {r: 3 for r in R}
+#cantidad maxima de periodos consecutivos que pueden pasar sin hacer mantención a un relave
+P_max = 4
+#cantidad  maxima de periodos consecutivos que pueden pasar sin satisfacer completamente el requerimiento de agua de la cubierta
+P_cubierta = 3
+#cantidad agua inicial en fuente f
+W_base = {f: 1000 for f in F}
+#costo transportar 1 ton de agua por arco (i.j)
+C_flujo = {(i,j): 0.5 for (i,j) in A}
+#capacidad maxima de flujo de agua en argo (i,j) mensualmente
+K_flujo ={(i,j): 500 for (i,j) in A}
+#cantidad agua maxima que se puede aplicar al relave r en cualquier periodo sin considerar cubierta vegetal
+U_agua = {r: 300 for r in R}
+#ton de agua minima que se aplica a un relave r si se decide humedecerlo
+a = {r: 50 for r in R}
+#flujo neto entrante a fuente f durante mes t.
+W_entrante = {(f,t): 100 for f in F for t in T}
 
 # Generar el modelo
 model = Model()
@@ -49,7 +76,7 @@ y_agua = model.addVars(R, T, vtype=GRB.BINARY, name="y_agua")
 
 z_veg = model.addVars(R, T, vtype=GRB.BINARY, name="z_veg")
 
-r = model.addVars(R, T, vtype=GRB.BINARY, name="r")
+rr = model.addVars(R, T, vtype=GRB.BINARY, name="rr")
 
 PM = model.addVars(R, T, vtype=GRB.CONTINUOUS, name="PM", lb=0)               
 W = model.addVars(F, T, vtype=GRB.CONTINUOUS, name="W", lb=0)                 
@@ -73,7 +100,7 @@ for r in R:
 #R3 Restistencia de cubierta - REVISAR
 for r in R:
     for t in T:
-        model.addConstr(quicksum(1-r[r,t2] for t2 in range(t,min(t+P_cubierta,T)))) <= (P_cubierta*z_veg[r,t])+(T*(1 - z_veg[r,t]))
+        model.addConstr(quicksum(1-rr[r,t2] for t2 in range(t,min(t+P_cubierta,len(T)))) <= (P_cubierta*z_veg[r,t])+(len(T)*(1 - z_veg[r,t])))
 
 #R4 Reducción de PM efectiva
 for r in R:
@@ -83,10 +110,11 @@ for r in R:
 
 #R5 Flujo de la concentración de material particulado
 for r in R:
-    #mes=1
-    model.addConstr(PM_base[r] + PM_agregado[r,0] - alpha[r]*(x_agua[r,0] - x_cubierta[r,0]) - beta_efectivo[r,0] == PM[r,0])
-    #meses posteriores
     for t in T:
+        #mes=1
+        if t == 0:
+            model.addConstr(PM_base[r] + PM_agregado[r,t] - alpha[r]*(x_agua[r,t] - x_cubierta[r,t]) - beta_efectivo[r,t] == PM[r,t])
+        #meses posteriores
         if t > 0: #como empezamos en t=0, t=1 es el 2do mes
             model.addConstr(PM[r,t-1] + PM_agregado[r,t] - alpha[r]*(x_agua[r,t] - x_cubierta[r,t]) - beta_efectivo[r,t] == PM[r,t])
 
@@ -97,7 +125,7 @@ for r in R:
 
 #R7 Control de PM promedio
 for t in T:
-    model.addConstr((1/len(R))*quicksum(PM[r,t] for r in R) <= PM[t])
+    model.addConstr((1/len(R))*quicksum(PM[r,t] for r in R) <= PM_prom[t])
 
 #R8 Agua mínima si hay mantención
 for r in R:
@@ -115,6 +143,11 @@ for r in R:
         model.addConstr(y_veg[r,t] <= y_mant[r,t])
 
 #R11 Presencia de la cubierta vegetal
+for r in R:
+    for t in T:
+        model.addConstrs((z_veg[r,t] >= y_veg[r,t2] for t2 in range(max(0, t - P[r] + 1), t + 1)))
+        model.addConstr(z_veg[r,t] <= quicksum(y_veg[r,t2] for t2 in range(max(0, t - P[r] + 1), t + 1)))
+        model.addConstr(quicksum(y_veg[r,t2] for t2 in range(t, min(t + P[r], len(T)))) <= 1)
 
 #R12 Presupuesto total
 model.addConstr(
@@ -123,24 +156,35 @@ model.addConstr(
     <= B_max
 )
 #R13 Balance de flujo en nodos intermedios
+for n in N:
+    if n not in F and n not in R:  # solo para nodos intermedios
+        for t in T:
+            model.addConstr(quicksum(x_flujo[(i,n),t] for (i,j) in A if j == n) - quicksum(x_flujo[(n,k),t] for (i,j) in A if i == n) == 0)
 
 #R14 Condición inicial de la fuente
 for f in F:
     model.addConstr(W[f,0] == W_base[f])
 
 #R15 Balance de la fuente para cada mes t 
+for f in F:
+    for t in T:
+        if t > 0:
+            model.addConstr(W[f,t] == W[f,t-1] + W_entrante[f,t] - quicksum(x_flujo[(f,k),t] for (i,j) in A if i == f))
 
 #R16 No extraer más de lo disponible
+for f in F:
+    for t in T:
+        model.addConstr(quicksum(x_flujo[(f,k),t] for (i,j) in A if i == f) <= W[f,t-1] + W_entrante[f,t])
 
 #R17 Nodos de relave
 for r in R:
     for t in T:
-        model.addConstr(quicksum(x_flujo[(j,r),t] for (j,r) in A) == x_agua[r,t])
-        
+        model.addConstr(quicksum(x_flujo[(j,r),t] for (j,r2) in A if r2 == r) == x_agua[r,t])
+
 #R18 Capacidad de las tuberías
 for (i, j) in A:
     for t in T:
-        model.addConstr(x_flujo[(i,j), t] <= K_flujo[A.index((i, j))])
+        model.addConstr(x_flujo[(i,j), t] <= K_flujo[(i, j)])
 
 
 #función objetivo
