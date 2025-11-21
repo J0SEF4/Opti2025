@@ -13,7 +13,6 @@ cveginst_df = pd.read_csv("datos/Cveginst.csv")
 hcubierta_df = pd.read_csv("datos/Hcubierta.csv")
 cvegmant_df = pd.read_csv("datos/Cvegmant.csv")
 hmant_df = pd.read_csv("datos/Hmant.csv")
-pmprom_df = pd.read_csv("datos/PMprom.csv")
 pcubierta_df = pd.read_csv("datos/Pcubierta.csv")
 fuentes_df = pd.read_csv("datos/Fuentes.csv")
 arcos_df = pd.read_csv("datos/Arcos.csv")
@@ -38,8 +37,6 @@ T = list(range(12))  # 12 meses
 R = relaves_df["Relave"].tolist()  #5r['Talabre', 'Pampa Austral', 'Potrerillos II', 'Ovejeria', 'Caren']
 #fuentes de agua, f 
 F = fuentes_df["Fuentes"].tolist()
-#nodos de la red, fuentes, nodos intermedios y relaves, n
-N = F + R  
 #arcos de la red, (i,j)
 A = [(row["Fuentes"], row["Relaves"]) for _, row in arcos_df.iterrows()]
 
@@ -60,9 +57,6 @@ H_cubierta = {row["Relave"]: row["Hcubierta"] for _, row in hcubierta_df.iterrow
 C_vegmant = {(row["Relaves"], row["Mes"]-1): row["Cvegmant"] for _, row in cvegmant_df.iterrows()}
 #umbral maximo de PM permitido en relave r por mes de planificación t, el csv esta anual se divide en 12
 PM_max = {(row["Relaves"], t): row["PMmax"]/12 for _, row in pmmax_df.iterrows() for t in T}
-#umbral promedio maximo de PM permitido para todos los relaves r en1 mes
-#ojo Pm_prom debe esar ug/m^3 y esta en ton/mes en csv, por lo que 1ton= 1x10^9 ug, 
-PM_prom = {t: float(pmprom_df["PMprom"].iloc[0]) for t in T} #un único valor promedio que se aplica a todos los meses.
 #agua minima necesaria para humedecer relave r cuando se realiza mantención por mes de planificación
 H_mant = {row["Relaves"]: row["Hmant"] /1000 for _, row in hmant_df.iterrows()}
 #cantidad  maxima de periodos consecutivos que pueden pasar sin satisfacer completamente el requerimiento de agua de la cubierta
@@ -78,7 +72,7 @@ K_flujo = {(row["Fuentes"], row["Relaves"]): float(row["Kflujo"]) for _, row in 
 #cantidad maxima de periodos consecutivos que pueden pasar sin hacer mantención a un relave
 P_max_val = int(pmax_df["Pmax"].iloc[0])
 P_max = {r: P_max_val for r in R}
-#maxima reduccion de PM  por cubierta vegetal en relave r por mes de planificación
+#maxima reduccion de PM  por cubierta vegetal en relave r
 beta = {row["Relaves"]: float(row["beta"]) for _, row in beta_df.iterrows()}
 #concentracion de PM que se agrega al relave r, mes t
 PM_agregado = {(row["Relaves"], row["Mes"]-1): float(row["PMagregado"]) for _, row in pmagregado_df.iterrows()}
@@ -149,26 +143,22 @@ for r in R:
     for t in T:
         model.addConstr(PM[r,t] <= PM_max[r,t])
 
-#R7 Control de PM promedio
-for t in T:
-    model.addConstr((1/len(R))*quicksum(PM[r,t] for r in R) <= PM_prom[t])
-
-#R8 Agua mínima si hay mantención
+#R7 Agua mínima si hay mantención
 for r in R:
     for t in T:
         model.addConstr(x_agua[r,t] >= H_mant[r]*y_mant[r,t])
 
-#R9 Ventana de mantención obligatoria
+#R8 Ventana de mantención obligatoria
 for r in R:
     for t in T:
         model.addConstr(quicksum(y_mant[r, t2] for t2 in range(max(0, t-P_max[r]+1), t+1)) >= 1)
 
-#R10 Acciones con mantención activa
+#R9 Acciones con mantención activa
 for r in R:
     for t in T:
         model.addConstr(y_veg[r,t] <= y_mant[r,t])
 
-#R11 Presencia de la cubierta vegetal
+#R10 Presencia de la cubierta vegetal
 for r in R:
     for t in T:
         model.addConstr(z_veg[r,t] >= y_veg[r,t])
@@ -177,33 +167,29 @@ for r in R:
             model.addConstr(z_veg[r,t] <= z_veg[r,t-1] + y_veg[r,t])
             model.addConstr(z_veg[r,t-1] + y_veg[r,t] <= 1)
 
-#R12 Presupuesto total
+#R11 Presupuesto total
 model.addConstr(
     quicksum(C_agua[r,t]*x_agua[r,t] + C_vegmant[r,t]*z_veg[r,t] + C_veginst[r,t]*y_veg[r,t] for r in R for t in T) 
     + quicksum(C_flujo[i,j]*x_flujo[i,j,t] for (i,j) in A for t in T)
     <= B_max
 )
 
-#R13 Condición inicial de la fuente
+#R12 Condición inicial de la fuente
 for f in F:
     model.addConstr(W[f,0] == W_base[f])
 
-#R14 Balance de la fuente para cada mes t 
-'''for f in F:
-    for t in T:
-        if t > 0:
-            model.addConstr(W[f,t] == W[f,t-1] + W_entrante[f,t] - quicksum(x_flujo[i,j,t] for (i,j) in A if i == f))'''
+#R13 Balance de la fuente para cada mes t 
 for f in F:
     for t in T:
         if t > 0:
             model.addConstr(W[f, t] == W[f, t-1]+ W_entrante.get((f, t), 0)- quicksum(x_flujo[i, j, t] for (i, j) in A if i == f))
 
-#R15 Nodos de relave
+#R14 Nodos de relave
 for r in R:
     for t in T:
         model.addConstr(quicksum(x_flujo[i,j,t] for (i,j) in A if j == r) == x_agua[r,t])
 
-#R16 Capacidad de las tuberías
+#R15 Capacidad de las tuberías
 for (i, j) in A:
     for t in T:
         model.addConstr(x_flujo[i,j,t] <= K_flujo[i, j])

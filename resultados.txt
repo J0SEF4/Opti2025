@@ -1,4 +1,100 @@
 ---------- Manejo de Soluciones ----------
 
+(a) Valor óptimo del problema: 25643939.921648264
 
-No se encontró solución óptima.
+(b) Agua aplicada por relave y por mes:
+Relave Talabre, agua total aplicada: 14723347.757910497
+  Mes 1: agua=8087040.0, cubierta=0.0, PM=1290706.583654993
+  Mes 2: agua=6635885.0, cubierta=0.0, PM=1286219.8642875245
+  Mes 3: agua=0.0, cubierta=0.0, PM=1286225.1642875245
+  Mes 4: agua=140.9193035, cubierta=0.0, PM=1286230.5688931148
+  Mes 5: agua=0.0, cubierta=0.0, PM=1286236.168893115
+  Mes 6: agua=0.0, cubierta=0.0, PM=1286241.268893115
+  Mes 7: agua=140.9193035, cubierta=0.0, PM=1286246.5734987052
+  Mes 8: agua=0.0, cubierta=0.0, PM=1286252.0734987052
+  Mes 9: agua=0.0, cubierta=0.0, PM=1286257.1734987053
+  Mes 10: agua=140.9193035, cubierta=0.0, PM=1286262.3781042956
+  Mes 11: agua=0.0, cubierta=0.0, PM=1286267.7781042955
+  Mes 12: agua=0.0, cubierta=0.0, PM=1286273.0781042955
+Relave Pampa Austral, agua total aplicada: 3888072.4763727197
+  Mes 1: agua=648000.0, cubierta=0.0, PM=332753.0034422384
+  Mes 2: agua=648000.0, cubierta=0.0, PM=332187.0686844768
+  Mes 3: agua=648000.0, cubierta=0.0, PM=331621.23392671515
+  Mes 4: agua=648000.0, cubierta=0.0, PM=331055.59916895354
+  Mes 5: agua=648000.0, cubierta=0.0, PM=330489.86441119196
+  Mes 6: agua=648000.0, cubierta=0.0, PM=329924.22965343035
+  Mes 7: agua=36.23818636, cubierta=0.0, PM=329952.8964387414
+  Mes 8: agua=0.0, cubierta=0.0, PM=329981.1964387414
+  Mes 9: agua=0.0, cubierta=0.0, PM=330009.6964387414
+  Mes 10: agua=36.23818636, cubierta=0.0, PM=330037.76322405244
+  Mes 11: agua=0.0, cubierta=0.0, PM=330065.76322405244
+  Mes 12: agua=0.0, cubierta=0.0, PM=330093.8632240524
+Relave Potrerillos II, agua total aplicada: 25068.739621166158
+  Mes 1: agua=0.07898765848949552, cubierta=1.7427448608546152, PM=0.0007288384482535548
+  Mes 2: agua=25068.42367053117, cubierta=8.567130937332966e-07, PM=0.0
+  Mes 3: agua=0.0, cubierta=9.079240698848669e-07, PM=14.199614100414825
+  Mes 4: agua=0.07898765881999999, cubierta=9.249219228971514e-07, PM=28.59917591737606
+  Mes 5: agua=0.0, cubierta=0.0, PM=43.09917591737606
+  Mes 6: agua=0.0, cubierta=1.603242817064224e-07, PM=57.5991077739312
+  Mes 7: agua=0.07898765883874148, cubierta=0.0, PM=72.19906271516152
+  Mes 8: agua=0.0, cubierta=0.0, PM=86.59906271516152
+  Mes 9: agua=0.0, cubierta=0.0, PM=101.29906271516154
+  Mes 10: agua=0.07898765883874148, cubierta=0.0, PM=115.49901765639186
+  Mes 11: agua=0.0, cubierta=0.0, PM=129.79901765639187
+  Mes 12: agua=0.0, cubierta=0.0, PM=143.99901765639186
+Relave Ovejeria, agua total aplicada: 439303502.8592173
+  Mes 1: agua=378872640.0, cubierta=0.0, PM=94390.57414497665
+  Mes 2: agua=60430786.76619457, cubierta=0.0, PM=72247.6398646691
+  Mes 3: agua=0.0, cubierta=0.0, PM=72263.7398646691
+  Mes 4: agua=25.36434092, cubierta=0.0, PM=72280.13056395782
+  Mes 5: agua=0.0, cubierta=0.0, PM=72296.83056395782
+  Mes 6: agua=0.0, cubierta=0.0, PM=72313.33056395782
+  Mes 7: agua=25.36434092, cubierta=0.0, PM=72329.52126324654
+  Mes 8: agua=0.0, cubierta=0.0, PM=72345.92126324654
+  Mes 9: agua=0.0, cubierta=0.0, PM=72362.22126324654
+  Mes 10: agua=25.36434092, cubierta=0.0, PM=72378.31196253526
+  Mes 11: agua=0.0, cubierta=0.0, PM=72394.41196253526
+  Mes 12: agua=0.0, cubierta=0.0, PM=72410.51196253527
+Relave Caren, agua total aplicada: 193.70022098582197
+  Mes 1: agua=48.42505520582199, cubierta=0.0, PM=445421.0427255763
+  Mes 2: agua=0.0, cubierta=0.0, PM=445428.44272557634
+  Mes 3: agua=0.0, cubierta=0.0, PM=445435.74272557633
+  Mes 4: agua=48.42505526, cubierta=0.0, PM=445443.42715115263
+  Mes 5: agua=0.0, cubierta=0.0, PM=445450.5271511526
+  Mes 6: agua=0.0, cubierta=0.0, PM=445458.2271511526
+  Mes 7: agua=48.42505526, cubierta=0.0, PM=445465.4115767289
+  Mes 8: agua=0.0, cubierta=0.0, PM=445473.11157672893
+  Mes 9: agua=0.0, cubierta=0.0, PM=445480.7115767289
+  Mes 10: agua=48.42505526, cubierta=0.0, PM=445488.0960023052
+  Mes 11: agua=0.0, cubierta=0.0, PM=445495.49600230524
+  Mes 12: agua=0.0, cubierta=0.0, PM=445502.79600230523
+
+(c) Flujo total desde cada fuente y por arco:
+Fuente Laguna de Aguas Claras Tranque Talabre, flujo total enviado: 2125805.0
+Fuente Laguna de Aguas Claras Tranque Ovejeria, flujo total enviado: 2592050.72868184
+Fuente Laguna de Aguas Claras Tranque Pampa austral, flujo total enviado: 777600.0
+Fuente Laguna de Aguas Claras Caren, flujo total enviado: 145.27516578
+Fuente Cuenca del rio Loa, flujo total enviado: 12597542.757910497
+Fuente Cuenca del rio Salado, flujo total enviado: 3135541.2159938863
+Fuente Cuenca del rio Maipo, flujo total enviado: 436711500.5555907
+Arco Laguna de Aguas Claras Tranque Talabre->Talabre, flujo total: 2125805.0
+Arco Cuenca del rio Loa->Talabre, flujo total: 12597542.757910497
+Arco Laguna de Aguas Claras Tranque Pampa austral->Pampa Austral, flujo total: 777600.0
+Arco Cuenca del rio Salado->Pampa Austral, flujo total: 3110472.4763727197
+Arco Cuenca del rio Salado->Potrerillos II, flujo total: 25068.739621166158
+Arco Laguna de Aguas Claras Tranque Ovejeria->Ovejeria, flujo total: 2592050.72868184
+Arco Cuenca del rio Maipo->Ovejeria, flujo total: 436711452.1305355
+Arco Laguna de Aguas Claras Caren->Caren, flujo total: 145.27516578
+Arco Cuenca del rio Maipo->Caren, flujo total: 48.42505520582199
+
+(d) Cubierta vegetal y mantenciones por relave:
+Relave Talabre: cubierta activa 0.0 meses, mantenciones 4.0 meses
+Relave Pampa Austral: cubierta activa 0.0 meses, mantenciones 5.0 meses
+Relave Potrerillos II: cubierta activa 0.9999999810506909 meses, mantenciones 5.0 meses
+Relave Ovejeria: cubierta activa 0.0 meses, mantenciones 4.0 meses
+Relave Caren: cubierta activa 0.0 meses, mantenciones 4.0 meses
+
+(e) Validación de factibilidad y consistencia:
+Presupuesto dentro del límite: 1011130977495.8138 <= 1011130977780
+
+La solución es óptima
