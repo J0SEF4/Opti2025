@@ -184,7 +184,7 @@ for f in F:
 for f in F:
     for t in T:
         if t > 1:
-            model.addConstr(W[f, t] == W[f, t-1]+ W_entrante.get((f, t), 0)- quicksum(x_flujo[i, j, t] for (i, j) in A if i == f))
+            model.addConstr(W[f, t] == W[f, t-1]+ W_entrante[f, t]- quicksum(x_flujo[i, j, t] for (i, j) in A if i == f))
 
 #R14 Nodos de relave
 for r in R:
