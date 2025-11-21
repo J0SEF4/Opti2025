@@ -160,12 +160,14 @@ for r in R:
 
 #R10 Presencia de la cubierta vegetal
 for r in R:
+    model.addConstr(z_veg[r,0] <= y_veg[r,0]) #nuevo incluido en E4
     for t in T:
         model.addConstr(z_veg[r,t] >= y_veg[r,t])
         model.addConstr(z_veg[r,t] <= quicksum(y_veg[r,t2] for t2 in range(max(0, t-P[r]+1), t+1)))
         if t > 0:
             model.addConstr(z_veg[r,t] <= z_veg[r,t-1] + y_veg[r,t])
-            model.addConstr(z_veg[r,t-1] + y_veg[r,t] <= 1)
+        if t < T[-1]:  # nuevo, equivalente a t <= T-2 acá porque acá empiezo en t=0 
+            model.addConstr(z_veg[r,t] + y_veg[r,t+1] <= 1)
 
 #R11 Presupuesto total
 model.addConstr(
