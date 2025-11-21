@@ -1,4 +1,37 @@
----------- Manejo de Soluciones ----------
+---------- METRICAS ----------
+
+Estado final del solver: 2
+GAP relativo: 2.9053962143446413e-16
+Tiempo total de resolución (s): 0.0820000171661377
+Nodos explorados: 1.0
+
+---------- INTERPRETACION ----------
+
+Relaves con mayor agua aplicada:
+ - Ovejeria: 439303502.8592173 ton/mes
+ - Talabre: 14723347.757910497 ton/mes
+ - Pampa Austral: 3888072.4763727197 ton/mes
+ - Potrerillos II: 25068.739621166158 ton/mes
+ - Caren: 193.70022098582197 ton/mes
+Máximo PM observado por relave:
+ - Talabre: 1290706.583654993
+ - Pampa Austral: 332753.0034422384
+ - Potrerillos II: 143.99901765639186
+ - Ovejeria: 94390.57414497665
+ - Caren: 445502.79600230523
+Meses con cubierta vegetal por relave:
+ - Talabre: 0.0 meses
+ - Pampa Austral: 0.0 meses
+ - Potrerillos II: 0.9999999810506909 meses
+ - Ovejeria: 0.0 meses
+ - Caren: 0.0 meses
+\---------- RESUMEN RAPIDO ----------
+
+Solución óptima encontrada.
+Valor del objetivo = 25643939.921648264
+GAP = 2.9053962143446413e-16
+Tiempo total = 0.0820000171661377 s
+---------- MANEJO DE SOLUCIONES ----------
 
 (a) Valor óptimo del problema: 25643939.921648264
 

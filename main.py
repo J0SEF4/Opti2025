@@ -206,8 +206,41 @@ model.optimize()
 # ---------imprimir resultados-----------------------------
 # Abrir archivo de resultados
 with open("resultados.txt", "w", encoding="utf-8") as f:
-    f.write("---------- Manejo de Soluciones ----------\n\n")
+    #METRICAS
+    f.write("---------- METRICAS ----------\n\n")
+    f.write(f"Estado final del solver: {model.Status}\n")
+    f.write(f"GAP relativo: {model.MIPGap}\n")
+    f.write(f"Tiempo total de resolución (s): {model.Runtime}\n")
+    f.write(f"Nodos explorados: {model.NodeCount}\n\n")
 
+    #INTERPRETACIÓN
+    f.write("---------- INTERPRETACION ----------\n\n")
+    # Ranking de relaves por consumo de agua
+    consumo = {r: sum(x_agua[r,t].X for t in T) for r in R}
+    orden = sorted(consumo, key=consumo.get, reverse=True)
+    f.write("Relaves con mayor agua aplicada:\n")
+    for r in orden:
+        f.write(f" - {r}: {consumo[r]} ton/mes\n")
+    # PM crítico
+    f.write("Máximo PM observado por relave:\n")
+    for r in R:
+        maxi = max(PM[r,t].X for t in T)
+        f.write(f" - {r}: {maxi}\n")
+    # Uso de cubierta vegetal
+    f.write("Meses con cubierta vegetal por relave:\n")
+    for r in R:
+        meses = sum(z_veg[r,t].X for t in T)
+        f.write(f" - {r}: {meses} meses\n")
+    
+    #RESUMEN
+    f.write("\---------- RESUMEN RAPIDO ----------\n\n")
+    f.write("Solución óptima encontrada.\n")
+    f.write(f"Valor del objetivo = {model.ObjVal}\n")
+    f.write(f"GAP = {model.MIPGap}\n")
+    f.write(f"Tiempo total = {model.Runtime} s\n")
+
+    #MANEJO DE SOLUCIONES
+    f.write("---------- MANEJO DE SOLUCIONES ----------\n\n")
     if model.Status == GRB.OPTIMAL:
         # (a) Valor óptimo del problema
         f.write(f"(a) Valor óptimo del problema: {model.ObjVal}\n\n")
@@ -261,6 +294,14 @@ with open("resultados.txt", "w", encoding="utf-8") as f:
         f.write("\nNo se encontró solución óptima.")
 
 print("Resultados guardados en 'resultados.txt'")
+
+#TABLAS
+#Tabla de PM por mes y por relave, para ver cuanto PM queda en cada relave mes a mes
+pm_table = pd.DataFrame({r: [PM[r,t].X for t in T] for r in R},index=T)
+pm_table.to_csv("tablaInterpretracion_PM.csv")
+#Tabla completa de agua por relave/mes, para ver cuanto y cuanto se rego cada relave, cuanta agua recibio tal relave en tal mes
+agua_table = pd.DataFrame({r: [x_agua[r,t].X for t in T] for r in R},index=T)
+agua_table.to_csv("tablaInterpretacion_agua.csv")
 
 if model.Status == GRB.INFEASIBLE:
     print("El modelo es infactible. Generando archivo de diagnóstico...")
