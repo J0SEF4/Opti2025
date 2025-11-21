@@ -32,7 +32,8 @@ wentrante_df = pd.read_csv("datos/Wentrante.csv")
 
 # --------Conjuntos..--------------------------------
 #meses de planificación, t
-T = list(range(12))  # 12 meses
+#T = list(range(12))  # 12 meses
+T = list(range(1, 13)) #T=1...12
 #relaves, r
 R = relaves_df["Relave"].tolist()  #5r['Talabre', 'Pampa Austral', 'Potrerillos II', 'Ovejeria', 'Caren']
 #fuentes de agua, f 
@@ -42,9 +43,9 @@ A = [(row["Fuentes"], row["Relaves"]) for _, row in arcos_df.iterrows()]
 
 # --------Parámetros----------------------------------
 #costo por ton de agua aplicado en relave r, mes t
-C_agua = {(row["Relave"], row["Mes"]-1): row["Cagua"] for _, row in cagua_df.iterrows()} #diccionario
+C_agua = {(row["Relave"], row["Mes"]): row["Cagua"] for _, row in cagua_df.iterrows()} #diccionario
 #costo instalar cubierta vegetal en relave r, mes t
-C_veginst = {(row["Relave"], row["Mes"]-1): row["Cveginst"] for _, row in cveginst_df.iterrows()}
+C_veginst = {(row["Relave"], row["Mes"]): row["Cveginst"] for _, row in cveginst_df.iterrows()}
 #presupuesto maximo a lo largo del periodo de planificación
 B_max = int(bmax_df["Bmax"].iloc[0])
 #periodos de duración de permanencia de cubierta vegetal en relave r 
@@ -54,11 +55,11 @@ U_agua = {row["Relave"]: int(row["Uagua"]) for _, row in uagua_df.iterrows()}
 #agua minima necesaria para humedecer una cubierta vegetal a su nivel optimo en relave r por mes de planificación
 H_cubierta = {row["Relave"]: row["Hcubierta"] for _, row in hcubierta_df.iterrows()}
 #costo mantención cubierta vegetal en relave r, mes t
-C_vegmant = {(row["Relaves"], row["Mes"]-1): row["Cvegmant"] for _, row in cvegmant_df.iterrows()}
+C_vegmant = {(row["Relaves"], row["Mes"]): row["Cvegmant"] for _, row in cvegmant_df.iterrows()}
 #umbral maximo de PM permitido en relave r por mes de planificación t, el csv esta anual se divide en 12
 PM_max = {(row["Relaves"], t): row["PMmax"]/12 for _, row in pmmax_df.iterrows() for t in T}
 #agua minima necesaria para humedecer relave r cuando se realiza mantención por mes de planificación
-H_mant = {row["Relaves"]: row["Hmant"] /1000 for _, row in hmant_df.iterrows()}
+H_mant = {row["Relaves"]: row["Hmant"]/1000 for _, row in hmant_df.iterrows()}
 #cantidad  maxima de periodos consecutivos que pueden pasar sin satisfacer completamente el requerimiento de agua de la cubierta
 P_cubierta = {row["Relaves"]: int(row["Pcubierta"]) for _, row in pcubierta_df.iterrows()}
 #concentracion inicial de PM en relave r
@@ -75,12 +76,12 @@ P_max = {r: P_max_val for r in R}
 #maxima reduccion de PM  por cubierta vegetal en relave r
 beta = {row["Relaves"]: float(row["beta"]) for _, row in beta_df.iterrows()}
 #concentracion de PM que se agrega al relave r, mes t
-PM_agregado = {(row["Relaves"], row["Mes"]-1): float(row["PMagregado"]) for _, row in pmagregado_df.iterrows()}
+PM_agregado = {(row["Relaves"], row["Mes"]): float(row["PMagregado"]) for _, row in pmagregado_df.iterrows()}
 #reducción PM por cada ton de agua aplicada en relave r
 alpha = {row["Relaves"]: float(row["alpha"]) for _, row in alpha_df.iterrows()}
-
 #flujo neto entrante a fuente f durante mes t.
-W_entrante = {(row["Fuentes"], row["Mes"] - 1): float(row["Wentrante"]) for _, row in wentrante_df.iterrows()}
+W_entrante = {(row["Fuentes"], row["Mes"]): float(row["Wentrante"]) for _, row in wentrante_df.iterrows()}
+
 # --------Generar el modelo-----------------------------
 model = Model()
 
@@ -119,8 +120,7 @@ for r in R:
 #R3 Restistencia de cubierta - REVISAR
 for r in R:
     for t in T:
-        model.addConstr(quicksum(1 - rr[r,t2] for t2 in range(t, min(t + P_cubierta[r], len(T)))) <= (P_cubierta[r] * z_veg[r,t]) + (len(T) * (1 - z_veg[r,t])))
-        #model.addConstr(quicksum(1-rr[r,t2] for t2 in range(t,min(t+P_cubierta,len(T)))) <= (P_cubierta*z_veg[r,t])+(len(T)*(1 - z_veg[r,t])))
+        model.addConstr(quicksum(1 - rr[r,t2] for t2 in range(t, min(t + P_cubierta[r], T[-1] + 1))) <= (P_cubierta[r] * z_veg[r,t]) + (len(T) * (1 - z_veg[r,t])))
 
 #R4 Reducción de PM efectiva
 for r in R:
@@ -132,10 +132,10 @@ for r in R:
 for r in R:
     for t in T:
         #mes=1
-        if t == 0:
+        if t == 1:
             model.addConstr(PM_base[r] + PM_agregado[r,t] - alpha[r]*(x_agua[r,t] - x_cubierta[r,t]) - beta_efectivo[r,t] == PM[r,t])
         #meses posteriores
-        if t > 0: #como empezamos en t=0, t=1 es el 2do mes
+        if t > 1:
             model.addConstr(PM[r,t-1] + PM_agregado[r,t] - alpha[r]*(x_agua[r,t] - x_cubierta[r,t]) - beta_efectivo[r,t] == PM[r,t])
 
 #R6 Control de PM por relave
@@ -151,7 +151,7 @@ for r in R:
 #R8 Ventana de mantención obligatoria
 for r in R:
     for t in T:
-        model.addConstr(quicksum(y_mant[r, t2] for t2 in range(max(0, t-P_max[r]+1), t+1)) >= 1)
+        model.addConstr(quicksum(y_mant[r, t2] for t2 in range(max(1, t-P_max[r]+1), t+1)) >= 1)
 
 #R9 Acciones con mantención activa
 for r in R:
@@ -160,13 +160,13 @@ for r in R:
 
 #R10 Presencia de la cubierta vegetal
 for r in R:
-    model.addConstr(z_veg[r,0] <= y_veg[r,0]) #nuevo incluido en E4
+    model.addConstr(z_veg[r,1] <= y_veg[r,1])
     for t in T:
         model.addConstr(z_veg[r,t] >= y_veg[r,t])
-        model.addConstr(z_veg[r,t] <= quicksum(y_veg[r,t2] for t2 in range(max(0, t-P[r]+1), t+1)))
-        if t > 0:
+        model.addConstr(z_veg[r,t] <= quicksum(y_veg[r,t2] for t2 in range(max(1, t-P[r]+1), t+1)))
+        if t > 1:    
             model.addConstr(z_veg[r,t] <= z_veg[r,t-1] + y_veg[r,t])
-        if t < T[-1]:  # nuevo, equivalente a t <= T-2 acá porque acá empiezo en t=0 
+        if t < T[-1]:  
             model.addConstr(z_veg[r,t] + y_veg[r,t+1] <= 1)
 
 #R11 Presupuesto total
@@ -178,12 +178,12 @@ model.addConstr(
 
 #R12 Condición inicial de la fuente
 for f in F:
-    model.addConstr(W[f,0] == W_base[f])
+    model.addConstr(W[f,1] == W_base[f])
 
 #R13 Balance de la fuente para cada mes t 
 for f in F:
     for t in T:
-        if t > 0:
+        if t > 1:
             model.addConstr(W[f, t] == W[f, t-1]+ W_entrante.get((f, t), 0)- quicksum(x_flujo[i, j, t] for (i, j) in A if i == f))
 
 #R14 Nodos de relave
@@ -218,7 +218,7 @@ with open("resultados.txt", "w", encoding="utf-8") as f:
             total_agua_r = sum(x_agua[r,t].X for t in T)
             f.write(f"Relave {r}, agua total aplicada: {total_agua_r}\n")
             for t in T:
-                f.write(f"  Mes {t+1}: agua={x_agua[r,t].X}, cubierta={x_cubierta[r,t].X}, PM={PM[r,t].X}\n")
+                f.write(f"  Mes {t}: agua={x_agua[r,t].X}, cubierta={x_cubierta[r,t].X}, PM={PM[r,t].X}\n")
         f.write("\n")
 
         # (c) Flujo total desde cada fuente y por arco
@@ -254,7 +254,7 @@ with open("resultados.txt", "w", encoding="utf-8") as f:
         for r in R:
             for t in T:
                 if PM[r,t].X > PM_max[r,t]:
-                    f.write(f"PM máximo excedido en {r}, mes {t+1}: {PM[r,t].X} > {PM_max[r,t]}\n")
+                    f.write(f"PM máximo excedido en {r}, mes {t}: {PM[r,t].X} > {PM_max[r,t]}\n")
 
         f.write("\nLa solución es óptima")
     else:
