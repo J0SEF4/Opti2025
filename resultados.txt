@@ -2,7 +2,7 @@
 
 Estado final del solver: 2
 GAP relativo: 2.9053962143446413e-16
-Tiempo total de resolución (s): 0.0820000171661377
+Tiempo total de resolución (s): 0.08700013160705566
 Nodos explorados: 1.0
 
 ---------- INTERPRETACION ----------
@@ -30,7 +30,7 @@ Meses con cubierta vegetal por relave:
 Solución óptima encontrada.
 Valor del objetivo = 25643939.921648264
 GAP = 2.9053962143446413e-16
-Tiempo total = 0.0820000171661377 s
+Tiempo total = 0.08700013160705566 s
 ---------- MANEJO DE SOLUCIONES ----------
 
 (a) Valor óptimo del problema: 25643939.921648264
